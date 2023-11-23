@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pokédex</title>
+    <style>
+        body {
+            background-color: #46abcd;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #pokedexContainer {
+            background-color: #9a3737;
+            box-shadow: 0 4px 8px rgba(44, 3, 3, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #000; 
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            border-bottom: 2px solid #ddd;
+        }
+
+        #textContainer {
+            text-align: left;
+            padding: 20px;
+            background-color: #6f92a9;
+            color: #fff;
+            border-radius: 5px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            width: 85%;
+            height: 50%;
+            font-size: 25px;
+            font-weight: bold;
+            text-shadow: 2px 2px 2px #000;
+        }
+
+
+        #statsContainer {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 90%;
+            text-shadow: 2px 2px 2px #000;
+            font-size: 24px;
+        }
+
+        .statBox {
+            width: 90%;
+            padding: 15px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        canvas {
+            width: 90%;
+            margin: 20px;
+            border: 2px solid #000; 
+        }
+        #buttonsContainer {
+            display: flex;
+            width: 50%;
+            justify-content: space-between;
+            margin-top: 30px; /* Espacio arriba */
+            margin-bottom: 20px; /* Espacio debajo */
+        }
+
+        #play, #pause {
+            width: 48%;
+            height: 48%;
+            padding: 20px 20px; /* Ajusta el espacio arriba y debajo */
+            font-size: 16px;
+            background-color: #e25813;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border: 2px solid #000;
+            margin: 10px;
+            border-radius: 30%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="pokedexContainer">
+    <video controls style="display:none" src="{{ url_for('static', filename='pokemon2.mp4') }}"></video>
+    <canvas></canvas>
+    <div id="textContainer">
+        <p id="pokemon"></p>
+        <p id="type"></p>
+    </div>
+
+    
+    <div id="statsContainer">
+        <div class="statBox" id="hp">Health </div>
+        <div class="statBox" id="attack">Attack </div>
+        <div class="statBox" id="defense">Defense </div>
+        <div class="statBox" id="speed">Speed </div>
+    </div>
+    <div id="buttonsContainer">
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+</div>
+
+</div>
+
+<script src="{{ url_for('static', filename='object_detector.js') }}" defer></script>
+
+</body>
+</html>
