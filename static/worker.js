@@ -7,7 +7,7 @@ onmessage = async(event) => {
 }
 
 async function run_model(input) {
-    const model = await ort.InferenceSession.create("./yolov8n.onnx");
+    const model = await ort.InferenceSession.create("./best_new.onnx");
     input = new ort.Tensor(Float32Array.from(input),[1, 3, 640, 640]);
     const outputs = await model.run({images:input});
     return outputs["output0"].data;

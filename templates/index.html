@@ -58,13 +58,21 @@
 
         .statBox {
             width: 90%;
-            padding: 15px;
+            padding: 5px;
             background-color: #3498db;
             color: #fff;
             border: none;
             border-radius: 5px;
             text-align: center;
         }
+
+        .fixed-text {
+            border: 2px solid #e25813; /* Cambia el color según tus preferencias */
+            padding: 5px; /* Ajusta según sea necesario para la separación del borde */
+            border-radius: 5px; /* Ajusta según sea necesario para bordes redondeados */
+            margin-bottom: 8px; /* Ajusta según sea necesario para la separación con el texto dinámico */
+        }
+
 
         canvas {
             width: 90%;
@@ -75,14 +83,14 @@
             display: flex;
             width: 50%;
             justify-content: space-between;
-            margin-top: 30px; /* Espacio arriba */
-            margin-bottom: 20px; /* Espacio debajo */
+            margin-top: 30px; 
+            margin-bottom: 20px; 
         }
 
         #play, #pause {
             width: 48%;
             height: 48%;
-            padding: 20px 20px; /* Ajusta el espacio arriba y debajo */
+            padding: 20px 20px; 
             font-size: 16px;
             background-color: #e25813;
             color: #fff;
@@ -107,10 +115,22 @@
 
     
     <div id="statsContainer">
-        <div class="statBox" id="hp">Health </div>
-        <div class="statBox" id="attack">Attack </div>
-        <div class="statBox" id="defense">Defense </div>
-        <div class="statBox" id="speed">Speed </div>
+        <div class="statBox" id="hp-container">
+            <p class="fixed-text">Health</p>
+            <p class="dynamic-text" id="hp"></p>
+        </div>
+        <div class="statBox" id="attack-container">
+            <p class="fixed-text">Attack</p>
+            <p class="dynamic-text" id="attack"></p>
+        </div>
+        <div class="statBox" id="defense-container">
+            <p class="fixed-text">Defense</p>
+            <p class="dynamic-text" id="defense"></p>
+        </div>
+        <div class="statBox" id="speed-container">
+            <p class="fixed-text">Speed</p>
+            <p class="dynamic-text" id="speed"></p>
+        </div>
     </div>
     <div id="buttonsContainer">
         <button id="play">Play</button>

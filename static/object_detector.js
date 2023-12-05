@@ -1,6 +1,15 @@
 const video = document.querySelector("video");
-
 const worker = new Worker("/static/worker.js");
+
+// ------------- Modify these variables if needed -------------
+let threshold = 0.3; // Value above which a prediction is considered correct
+let nc = 149; // Number of classes in the dataset (COCO = 80), (Pokemons = 149)
+let frames = 1; // Number of frames skipped between detections (frames = 1 to detect on each frame)
+
+// ------------ Uncomment the dataset classes used ------------
+const classes = ['Abra', 'Aerodactyl', 'Alakazam', 'Arbok', 'Arcanine', 'Articuno', 'Beedrill', 'Bellsprout', 'Blastoise', 'Bulbasaur', 'Butterfree', 'Caterpie', 'Chansey', 'Charizard', 'Charmander', 'Charmeleon', 'Clefable', 'Clefairy', 'Cloyster', 'Cubone', 'Dewgong', 'Diglett', 'Ditto', 'Dodrio', 'Doduo', 'Dragonair', 'Dragonite', 'Dratini', 'Drowzee', 'Dugtrio', 'Eevee', 'Ekans', 'Electabuzz', 'Electrode', 'Exeggcute', 'Exeggutor', 'Farfetchd', 'Fearow', 'Flareon', 'Gastly', 'Gengar', 'Geodude', 'Gloom', 'Golbat', 'Goldeen', 'Golduck', 'Golem', 'Graveler', 'Grimer', 'Growlithe', 'Gyarados', 'Haunter', 'Hitmonchan', 'Hitmonlee', 'Horsea', 'Hypno', 'Ivysaur', 'Jigglypuff', 'Jolteon', 'Jynx', 'Kabuto', 'Kabutops', 'Kadabra', 'Kakuna', 'Kangaskhan', 'Kingler', 'Koffing', 'Krabby', 'Lapras', 'Lickitung', 'Machamp', 'Machoke', 'Machop', 'Magikarp', 'Magmar', 'Magnemite', 'Magneton', 'Mankey', 'Marowak', 'Meowth', 'Metapod', 'Mew', 'Mewtwo', 'Moltres', 'MrMime', 'Muk', 'Nidoking', 'Nidoqueen', 'Nidorina', 'Nidorino', 'Ninetales', 'Oddish', 'Omanyte', 'Omastar', 'Onix', 'Paras', 'Parasect', 'Persian', 'Pidgeot', 'Pidgeotto', 'Pidgey', 'Pikachu', 'Pinsir', 'Poliwag', 'Poliwhirl', 'Poliwrath', 'Ponyta', 'Porygon', 'Primeape', 'Psyduck', 'Raichu', 'Rapidash', 'Raticate', 'Rattata', 'Rhydon', 'Rhyhorn', 'Sandshrew', 'Sandslash', 'Scyther', 'Seadra', 'Seaking', 'Seel', 'Shellder', 'Slowbro', 'Slowpoke', 'Snorlax', 'Spearow', 'Squirtle', 'Starmie', 'Staryu', 'Tangela', 'Tauros', 'Tentacool', 'Tentacruel', 'Vaporeon', 'Venomoth', 'Venonat', 'Venusaur', 'Victreebel', 'Vileplume', 'Voltorb', 'Vulpix', 'Wartortle', 'Weedle', 'Weepinbell', 'Weezing', 'Wigglytuff', 'Zapdos', 'Zubat'];
+//const classes = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'];
+
 
 let pokemon; 
 let hp = "";
@@ -11,23 +20,26 @@ let speed = "";
 let boxes = [];
 let interval
 let busy = false;
+let isPlaying = false;
 
 video.addEventListener("play", () => {
     const canvas = document.querySelector("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const context = canvas.getContext("2d");
-    interval = setInterval(() => {
-        context.drawImage(video,0,0);
-        draw_boxes(canvas, boxes);
-        const input = prepare_input(canvas);
-        if (!busy) {
-            console.log('post')
-            video.pause();
-            worker.postMessage(input);
-            busy = true;
-        }        
-    },30)
+    if (isPlaying) {
+        interval = setInterval(() => {
+            context.drawImage(video,0,0);
+            draw_boxes(canvas, boxes);
+            const input = prepare_input(canvas);
+            if (!busy) {
+                console.log('post')
+                video.pause();
+                worker.postMessage(input);
+                busy = true;
+            }        
+        },30*frames)
+    }
 });
 
 worker.onmessage = (event) => {
@@ -45,11 +57,14 @@ video.addEventListener("pause", () => {
 
 const playBtn = document.getElementById("play");
 const pauseBtn = document.getElementById("pause");
+
 playBtn.addEventListener("click", () => {
     video.play();
+    isPlaying = true;
 });
 pauseBtn.addEventListener("click", () => {
     video.pause();
+    isPlaying = false;
 });
 
 function prepare_input(img) {  
@@ -71,13 +86,13 @@ function prepare_input(img) {
 function process_output(output, img_width, img_height) {
     let boxes = [];
     for (let index=0;index<8400;index++) {
-        const [class_id,prob] = [...Array(149).keys()]
+        const [class_id,prob] = [...Array(nc).keys()]
             .map(col => [col, output[8400*(col+4)+index]])
             .reduce((accum, item) => item[1]>accum[1] ? item : accum,[0,0]);
-        if (prob < 0.1) {
+        if (prob < threshold) {
             continue;
         }
-        const label = yolo_classes[class_id];
+        const label = classes[class_id];
         fetch("/static/stats.csv")
             .then(response => response.text())
             .then(data => {
@@ -104,10 +119,10 @@ function process_output(output, img_width, img_height) {
 
         pokemon = label;
         document.getElementById("pokemon").textContent = "A wild " + pokemon + " appeared!!!";
-        document.getElementById("hp").textContent = "- Health - " + hp;
-        document.getElementById("attack").textContent = "- Attack -  " + attack;
-        document.getElementById("defense").textContent = "- Defense - " + defense;
-        document.getElementById("speed").textContent = "- Speed - " + speed;
+        document.getElementById("hp").textContent = hp;
+        document.getElementById("attack").textContent = attack;
+        document.getElementById("defense").textContent = defense;
+        document.getElementById("speed").textContent = speed;
         const xc = output[index];
         const yc = output[8400+index];
         const w = output[2*8400+index];
@@ -172,4 +187,3 @@ function draw_boxes(canvas,boxes) {
     });
 }
 
-const yolo_classes = ['Abra', 'Aerodactyl', 'Alakazam', 'Arbok', 'Arcanine', 'Articuno', 'Beedrill', 'Bellsprout', 'Blastoise', 'Bulbasaur', 'Butterfree', 'Caterpie', 'Chansey', 'Charizard', 'Charmander', 'Charmeleon', 'Clefable', 'Clefairy', 'Cloyster', 'Cubone', 'Dewgong', 'Diglett', 'Ditto', 'Dodrio', 'Doduo', 'Dragonair', 'Dragonite', 'Dratini', 'Drowzee', 'Dugtrio', 'Eevee', 'Ekans', 'Electabuzz', 'Electrode', 'Exeggcute', 'Exeggutor', 'Farfetchd', 'Fearow', 'Flareon', 'Gastly', 'Gengar', 'Geodude', 'Gloom', 'Golbat', 'Goldeen', 'Golduck', 'Golem', 'Graveler', 'Grimer', 'Growlithe', 'Gyarados', 'Haunter', 'Hitmonchan', 'Hitmonlee', 'Horsea', 'Hypno', 'Ivysaur', 'Jigglypuff', 'Jolteon', 'Jynx', 'Kabuto', 'Kabutops', 'Kadabra', 'Kakuna', 'Kangaskhan', 'Kingler', 'Koffing', 'Krabby', 'Lapras', 'Lickitung', 'Machamp', 'Machoke', 'Machop', 'Magikarp', 'Magmar', 'Magnemite', 'Magneton', 'Mankey', 'Marowak', 'Meowth', 'Metapod', 'Mew', 'Mewtwo', 'Moltres', 'MrMime', 'Muk', 'Nidoking', 'Nidoqueen', 'Nidorina', 'Nidorino', 'Ninetales', 'Oddish', 'Omanyte', 'Omastar', 'Onix', 'Paras', 'Parasect', 'Persian', 'Pidgeot', 'Pidgeotto', 'Pidgey', 'Pikachu', 'Pinsir', 'Poliwag', 'Poliwhirl', 'Poliwrath', 'Ponyta', 'Porygon', 'Primeape', 'Psyduck', 'Raichu', 'Rapidash', 'Raticate', 'Rattata', 'Rhydon', 'Rhyhorn', 'Sandshrew', 'Sandslash', 'Scyther', 'Seadra', 'Seaking', 'Seel', 'Shellder', 'Slowbro', 'Slowpoke', 'Snorlax', 'Spearow', 'Squirtle', 'Starmie', 'Staryu', 'Tangela', 'Tauros', 'Tentacool', 'Tentacruel', 'Vaporeon', 'Venomoth', 'Venonat', 'Venusaur', 'Victreebel', 'Vileplume', 'Voltorb', 'Vulpix', 'Wartortle', 'Weedle', 'Weepinbell', 'Weezing', 'Wigglytuff', 'Zapdos', 'Zubat'];
